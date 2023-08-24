@@ -62,10 +62,39 @@
             />
           </div>
         </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label for="birthday" class="form-label">Tanggal Lahir:</label>
+            <input type="date" class="form-control" name="birthday" required />
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="className" class="form-label">Kelas: (Contoh: XII-SIJA-1 atau XI-1 atau X-A)</label>
+            <input
+              type="text"
+              class="form-control"
+              name="className"
+              required
+            />
+          </div>
+        </div>
+
         
-        <div class="mb-3">
-          <label for="image" class="form-label">Image:</label>
-          <input type="file" class="form-control" name="image" required />
+        
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <img src="https://upload.wikimedia.org/wikipedia/commons/d/d3/Foto_Formal_Sudharmono.jpg" class="card-img-top" style="object-position: center; object-fit: contain;" height="200" alt="contoh foto">
+              <div class="card-body">
+                <h5 class="card-title">Contoh</h5>
+                <p class="card-text">Ini adalah contoh gambar yang diharapkan. Pastikan gambar mengikuti ketentuan yang telah disebutkan.</p>
+              </div>
+            </div>
+          </div>
+          <div class="col-md-6 mb-3">
+            <label for="image" class="form-label">Image: (Harus: Lepas Kacamata, Lepas Masker, Lepas Aksesoris Wajah)</label>
+            <input type="file" class="form-control" name="image" required />
+          </div>
         </div>
         
         <button type="submit" class="btn btn-primary">Upload</button>
