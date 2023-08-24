@@ -7,7 +7,11 @@ const port = 3000;
 
 function cutStringTo30Chars(inputString) {
   if (inputString.length > 30) {
-    return inputString.substring(0, 30) + "..."; // Add ellipsis if the string is longer
+    return inputString
+      .replace(/\b\w/g, function (match) {
+        return match.toUpperCase();
+      })
+      .substring(0, 30); // Add ellipsis if the string is longer
   } else {
     return inputString;
   }
@@ -22,10 +26,16 @@ const storage = multer.diskStorage({
     const { phoneNumber, name, sex, birthday, className, phoneNumberParent } =
       req.body;
 
-    const customFilename = `${phoneNumber}#I${cutStringTo30Chars(
+    const customFilename = `${phoneNumber
+      .replace(/[-\s]/g, "")
+      .trim()}#I${cutStringTo30Chars(
       name
-    )}#S${sex}#B${birthday}#C${className}#P${phoneNumberParent}#${phoneNumber}#T1#M${phoneNumberParent}`;
-    const filename = `${customFilename}.jpg`;
+    )}#S${sex}#B${birthday}#C${className.trim()}#P${phoneNumberParent
+      .replace(/[-\s]/g, "")
+      .trim()}#${phoneNumber
+      .replace(/[-\s]/g, "")
+      .trim()}#T1#M${phoneNumberParent.replace(/[-\s]/g, "").trim()}`;
+    const filename = `${customFilename.trim()}.jpg`;
     cb(null, filename);
   },
 });
@@ -56,7 +66,7 @@ app.post("/upload", upload.single("image"), async (req, res) => {
 
   // Compress the image using sharp
   await sharp(inputPath)
-    .resize(300, 300)
+    .resize(400, 400)
     .jpeg({ quality: 80 }) // Set the JPEG quality (0-100)
     .toFile(outputPath);
 
