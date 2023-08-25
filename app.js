@@ -1,7 +1,8 @@
 const express = require("express");
 const multer = require("multer");
 const path = require("path");
-const sharp = require("sharp"); // Import sharp library
+const sharp = require("sharp");
+const fs = require("fs"); // Import the fs module
 const app = express();
 const port = 3000;
 
@@ -19,7 +20,18 @@ function cutStringTo30Chars(inputString) {
 
 // Multer setup for file uploads
 const storage = multer.diskStorage({
-  destination: "./public/uploads/",
+  destination: function (req, file, cb) {
+    const className = req.body.className.trim();
+    const destination = `./public/uploads/${className}`;
+
+    // Create the directory if it doesn't exist
+    fs.mkdir(destination, { recursive: true }, (err) => {
+      if (err) {
+        console.error("Error creating folder:", err);
+      }
+      cb(null, destination);
+    });
+  },
   filename: function (req, file, cb) {
     const ext = path.extname(file.originalname);
 
@@ -47,42 +59,51 @@ app.set("view engine", "ejs");
 
 // Routes
 app.get("/", (req, res) => {
-  // Render the form for uploading data and image
   res.render("index");
 });
 
 app.post("/upload", upload.single("image"), async (req, res) => {
   const { phoneNumber, name, sex, birthday, className, phoneNumberParent } =
     req.body;
-  const imageName = req.file.filename;
 
-  const inputPath = path.join(__dirname, "public/uploads", req.file.filename);
-  const outputFilename = req.file.filename;
-  const outputPath = path.join(
-    __dirname,
-    "public/uploads/compress",
-    outputFilename
-  );
+  try {
+    const inputPath = path.join(
+      __dirname,
+      "public/uploads",
+      className,
+      req.file.filename
+    );
+    const outputFolderPath = path.join(
+      __dirname,
+      "public/uploads/compress",
+      className
+    );
+    const outputFilename = req.file.filename;
+    const outputPath = path.join(outputFolderPath, outputFilename);
 
-  // Compress the image using sharp
-  await sharp(inputPath)
-    .resize(400, 400)
-    .jpeg({ quality: 80 }) // Set the JPEG quality (0-100)
-    .toFile(outputPath);
+    // Create the output folder if it doesn't exist
+    fs.mkdirSync(outputFolderPath, { recursive: true });
 
-  // Store data and image details in your database or file system
-  // For simplicity, we'll just log the data for now
-  console.log("Uploaded Data:", {
-    phoneNumber,
-    name,
-    sex,
-    birthday,
-    className,
-    imageName,
-    phoneNumberParent,
-  });
+    // Compress the image using sharp
+    await sharp(inputPath)
+      .resize(400, 400)
+      .jpeg({ quality: 80 }) // Set the JPEG quality (0-100)
+      .toFile(outputPath);
 
-  res.redirect("/");
+    console.log("Uploaded Data:", {
+      phoneNumber,
+      name,
+      sex,
+      birthday,
+      className,
+      imageName: outputFilename, // Use the compressed image's filename
+      phoneNumberParent,
+    });
+
+    res.redirect("/");
+  } catch (error) {
+    console.error("Error:", error);
+  }
 });
 
 app.listen(port, () => {
